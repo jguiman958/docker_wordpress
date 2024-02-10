@@ -103,7 +103,8 @@ Se emplea tambien un volumen con nombre, para mantener la persistencia de datos,
 
 Docker-compose, funciona con etiquetas, no hace falta poner ips este fichero ya creará las redes con la etiqueta frontend-network y backend-network, tambien hay que tener en cuenta que depende de que mysql este en funcionamiento.
 
-#### Comenzamos la parte de la instalación de mysql
+#### Comenzamos la parte de la instalación de mysql.
+  Como estamos trabajando con etiquetas, trabajamos siempre con nombres, ports...., image...., environment..., en el apartado environment disponemos de una serie de nombres donde debe incluirse con información el cual docker al ejecutarse, establecerá los parametros necesarios, traido a traves de unas variables, traidas desde nuestro fichero env
 ```
   mysql:
     image: mysql:8.0
@@ -121,6 +122,19 @@ Docker-compose, funciona con etiquetas, no hace falta poner ips este fichero ya 
       - backend-network
 ```
 
+Disponemos inclusive de un volumen el cual hace que el contenedor de mysql sea persistente, restart hace que se reinicia en caso de que el contenedor se tumbe, asignandole la red del backend.
+
+Estas son las variables que usa:
+
+```
+WORDPRESS_DATABASE_NAME=wordpress
+WORDPRESS_DATABASE_USER=wp_user
+WORDPRESS_DATABASE_PASSWORD=wp_pass
+
+MYSQL_ROOT_PASSWORD=root
+```
+Como podemos ver concuerda con las variables de la base de datos asignada a wordpress.
+
 #### Comenzamos la parte de instalación de phpmyadmin.
 ```   
   phpmyadmin:
@@ -134,6 +148,8 @@ Docker-compose, funciona con etiquetas, no hace falta poner ips este fichero ya 
       - frontend-network
       - backend-network
 ```
+
+Aquí instala phpmyadmin tomando como host mysql y asignando las dos redes, las necesita para poder acceder a la base de datos desde el frontend, como comprobamos no le asignamos persistencia.
 
 #### Comenzamos la parte de instalación de https en wordpress, para securizarlo.
 ```
@@ -150,6 +166,14 @@ Docker-compose, funciona con etiquetas, no hace falta poner ips este fichero ya 
     networks:
       - frontend-network
 ```
+En este caso, necesita los 80 y 443, http y https, http para que se pueda comunica con las otras maquinas, y https para que muestra el contenido de forma segura, encriptando las peticiones, es necesario usar la variable:
+
+```
+DNS_DOMAIN_SECURE=ansible-frontend.ddns.net
+```
+
+Para que certifique el dominio por una autoridad certificadora de confianza y que el sitio sea seguro.
+
 
 #### Parte de los volumenes y redes creadas durante la creación del fichero docker-compose.yml
 ```
@@ -162,4 +186,18 @@ networks:
   backend-network:
 ```
 
+Es necesario crear, estas redes y volumenes al final para que se asigne de forma correcta a los docker.
+
 ## Comprobación de que funciona el fichero.
+
+Comprobacion de que al lanzar el comando ``docker-compose up`` funcione.
+
+![alt text](<capturas/Instalación terminada.PNG>)
+
+Podemos comprobar que se ha ejecutado la instruccion correctamente y ya está wordpress instalado.
+
+## Comprobacion que se ve desde el navegador.
+
+![alt text](capturas/wordpress-docker.PNG)
+
+Y aquí lo tenemos desde el navegador, mostrando claramente que ha funcionado.
